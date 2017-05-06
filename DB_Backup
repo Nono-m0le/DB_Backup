@@ -1,0 +1,15 @@
+#!/bin/bash
+backup_dir=/path/to/mysql_backup/
+max_time="10" 
+host="db_host"
+user="the_user"
+pass="the_pass"
+sqlarg="-h $host -u $user -p${pass}"
+
+for table in `mysql $sqlarg -e 'show databases;' | tail -n +3`
+do
+        mysqldump $sqlarg $table | gzip -9 > ${backup_dir}${table}.sql.gz
+done
+zip -r ${backup_dir}`date +'%Y%m%d-%H%M'`_mysql.zip ${backup_dir}*.sql.gz
+rm -f ${backup_dir}*.sql.gz    
+find ${backup_dir}*.zip -mtime +${max_time} -exec rm {} \;
